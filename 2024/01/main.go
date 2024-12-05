@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func findDistance(left, right []int) int {
+func part1(left, right []int) int {
 	var distance int
 
 	for range left {
@@ -29,7 +29,7 @@ func findDistance(left, right []int) int {
 	return distance
 }
 
-func findSimilarity(left, right []int) int {
+func part2(left, right []int) int {
 	var similarity int
 
 	cache := make(map[int]int)
@@ -92,6 +92,7 @@ func readFile() ([]int, []int) {
 	if err != nil {
 		panic(fmt.Sprintf("failed to open file\n\nerr:\n%v\n", err))
 	}
+	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
@@ -118,9 +119,9 @@ func readFile() ([]int, []int) {
 
 func main() {
 	left, right := readFile()
-	distance := findDistance(left, right)
+	distance := part1(left, right)
 	fmt.Println(distance)
 
-	similarity := findSimilarity(left, right)
+	similarity := part2(left, right)
 	fmt.Println(similarity)
 }
