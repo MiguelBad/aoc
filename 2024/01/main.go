@@ -29,6 +29,32 @@ func findDistance(left, right []int) int {
 	return distance
 }
 
+func findSimilarity(left, right []int) int {
+	var similarity int
+
+	cache := make(map[int]int)
+
+	for _, i := range left {
+		if val, ok := cache[i]; ok {
+			similarity += val
+			continue
+		}
+
+		occurrence := 0
+		for _, j := range right {
+			if i == j {
+				occurrence++
+			}
+		}
+
+		score := occurrence * i
+		similarity += score
+		cache[i] = score
+	}
+
+	return similarity
+}
+
 func quickSortPartition(arr []int, low, high int) int {
 	idx := low - 1
 	for i := low; i < high; i++ {
@@ -94,4 +120,7 @@ func main() {
 	left, right := readFile()
 	distance := findDistance(left, right)
 	fmt.Println(distance)
+
+	similarity := findSimilarity(left, right)
+	fmt.Println(similarity)
 }
