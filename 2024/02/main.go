@@ -8,7 +8,34 @@ import (
 	"strings"
 )
 
-func checkReportHelper(report []int) bool {
+func part2Helper(report []int) bool {
+	if part1Helper(report) {
+		return true
+	}
+
+	for i := 0; i < len(report); i++ {
+		modifiedReport := append([]int{}, report[:i]...)
+		modifiedReport = append(modifiedReport, report[i+1:]...)
+		if part1Helper(modifiedReport) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func part2(reports [][]int) int {
+	var safe int
+	for _, report := range reports {
+		if part2Helper(report) {
+			fmt.Println(report)
+			safe++
+		}
+	}
+	return safe
+}
+
+func part1Helper(report []int) bool {
 	isAscending := report[0] < report[1]
 	for i := 1; i < len(report)-1; i++ {
 		if isAscending {
@@ -32,16 +59,14 @@ func checkReportHelper(report []int) bool {
 		if prevDiff < 1 || prevDiff > 3 || nextDiff < 1 || nextDiff > 3 {
 			return false
 		}
-
-        fmt.Println(prevDiff, nextDiff)
 	}
 	return true
 }
 
-func checkReport(reports [][]int) int {
+func part1(reports [][]int) int {
 	var safe int
 	for _, report := range reports {
-		if checkReportHelper(report) {
+		if part1Helper(report) {
 			safe++
 		}
 	}
@@ -76,6 +101,9 @@ func readFile() [][]int {
 
 func main() {
 	reports := readFile()
-	safe := checkReport(reports)
+	safe := part1(reports)
 	fmt.Println(safe)
+
+	foo := part2(reports)
+	fmt.Println(foo)
 }
