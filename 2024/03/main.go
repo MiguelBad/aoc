@@ -15,13 +15,33 @@ func getProductSum(multiplicand [][]int) int {
 	return productSum
 }
 
-func getMultiplicand(instructions string) [][]int {
+func getMultiplicand(inst string) [][]int {
 	var cleaned [][]int
 	var currDigit string
 	var multiplicand []int
 	openningPattern := "mul("
 
-	for _, v := range instructions {
+	var disabled bool
+
+	fmt.Println(string([]byte{inst[0], inst[1]}))
+
+	for i, v := range inst {
+		if string(v) == "d" {
+			if i > len(inst)-1 {
+				continue
+			}
+
+			if string([]byte{inst[i], inst[i+1], inst[i+2], inst[i+3]}) == "do()" {
+                disabled = false
+			} else if string([]byte{inst[i], inst[i+1], inst[i+2], inst[i+3], inst[i+4], inst[i+5], inst[i+6]}) == "don't()" {
+                disabled = true
+			}
+		}
+
+		if disabled {
+			continue
+		}
+
 		if len(openningPattern) > 0 {
 			if rune(openningPattern[0]) == v {
 				openningPattern = openningPattern[1:]
@@ -87,7 +107,7 @@ func readFile() string {
 }
 
 func main() {
-	instructions := readFile()
-	multiplicand := getMultiplicand(instructions)
+	inst := readFile()
+	multiplicand := getMultiplicand(inst)
 	fmt.Println(getProductSum(multiplicand))
 }
