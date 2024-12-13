@@ -32,8 +32,40 @@ func getNext(curr, next []int, textList *[][]string) ([]int, bool) {
 	return []int{x, y}, isErr
 }
 
-func searchHelper(dirList map[string][]int, dir string, curr []int, textList *[][]string, word string, count *int) {
-	fmt.Println(curr[0], curr[1], word, (*textList)[curr[0]][curr[1]], dir)
+//  -
+//    -
+//      -
+//        -
+//          -
+// left diagonal
+
+func part2(dirList map[string][]int, curr []int, textList *[][]string, count *int) {
+	leftDirTop, err := getNext(curr, dirList["nw"], textList)
+	if err {
+		return
+	}
+	leftDirBot, err := getNext(curr, dirList["se"], textList)
+	if err {
+		return
+	}
+	rightDirTop, err := getNext(curr, dirList["ne"], textList)
+	if err {
+		return
+	}
+	rightDirBot, err := getNext(curr, dirList["sw"], textList)
+	if err {
+		return
+	}
+
+	if (((*textList)[leftDirTop[1]][leftDirTop[0]] == "M" && (*textList)[leftDirBot[1]][leftDirBot[0]] == "S") ||
+		((*textList)[leftDirTop[1]][leftDirTop[0]] == "S" && (*textList)[leftDirBot[1]][leftDirBot[0]] == "M")) &&
+		(((*textList)[rightDirTop[1]][rightDirTop[0]] == "M" && (*textList)[rightDirBot[1]][rightDirBot[0]] == "S") ||
+			((*textList)[rightDirTop[1]][rightDirTop[0]] == "S" && (*textList)[rightDirBot[1]][rightDirBot[0]] == "M")) {
+		*count++
+	}
+}
+
+func part1(dirList map[string][]int, dir string, curr []int, textList *[][]string, word string, count *int) {
 	if word == "" {
 		*count++
 		return
@@ -45,7 +77,7 @@ func searchHelper(dirList map[string][]int, dir string, curr []int, textList *[]
 			return
 		}
 		if (*textList)[nextPos[1]][nextPos[0]] == string(word[0]) {
-			searchHelper(dirList, dir, nextPos, textList, word[1:], count)
+			part1(dirList, dir, nextPos, textList, word[1:], count)
 		}
 		return
 	}
@@ -56,24 +88,26 @@ func searchHelper(dirList map[string][]int, dir string, curr []int, textList *[]
 			continue
 		}
 		if (*textList)[nextPos[1]][nextPos[0]] == string(word[0]) {
-			searchHelper(dirList, key, nextPos, textList, word[1:], count)
+			part1(dirList, key, nextPos, textList, word[1:], count)
 		}
 	}
 }
 
-func search(textList *[][]string, dirList map[string][]int) int {
-	var count int
+func search(textList *[][]string, dirList map[string][]int) (int, int) {
+	var part1count int
+	var part2count int
 	for rIdx, row := range *textList {
 		for lIdx, letter := range row {
+			curr := []int{lIdx, rIdx}
 			if letter == "X" {
-				curr := []int{lIdx, rIdx}
-				fmt.Println(curr, "X")
-				searchHelper(dirList, "", curr, textList, "MAS", &count)
-				fmt.Println()
+				part1(dirList, "", curr, textList, "MAS", &part1count)
+			}
+			if letter == "A" {
+				part2(dirList, curr, textList, &part2count)
 			}
 		}
 	}
-	return count
+	return part1count, part2count
 }
 
 func readFile() [][]string {
