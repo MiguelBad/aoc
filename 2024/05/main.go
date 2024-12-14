@@ -65,29 +65,81 @@ func contains(arr []int, item int) bool {
 	return false
 }
 
-func part1helper(rule *map[int][]int, update *[]int, sum *int) {
-	for i := 0; i < len(*update)-1; i++ {
-		if _, ok := (*rule)[(*update)[i]]; !ok {
-			return
-		}
-		for j := i + 1; j < len(*update)-1; j++ {
-			if !contains((*rule)[(*update)[i]], (*update)[j]) {
-				return
+func reOrder(rule *map[int][]int, arr *[]int) *[]int {
+	var ordered []int
+	count := make(map[int]int)
+	for i := 0; i < len(*arr); i++ {
+		for j := 0; j < len(*arr); j++ {
+			if i == j {
+				continue
+			}
+
+			if contains((*rule)[(*arr)[i]], (*arr)[j]) {
+				if _, ok := count[(*arr)[i]]; !ok {
+					count[(*arr)[i]] = 1
+				} else {
+					count[(*arr)[i]]++
+				}
 			}
 		}
 	}
-	*sum += (*update)[len(*update)/2]
+
+	for len(count) > 0 {
+		// largest[0] = count
+		// largest[1] = key
+		largest := []int{0, 0}
+		for i := range count {
+			if count[i] > largest[0] {
+				largest[0] = count[i]
+				largest[1] = i
+			}
+		}
+		ordered = append(ordered, largest[1])
+		delete(count, largest[1])
+	}
+	return &ordered
 }
 
-func part1(rule *map[int][]int, updates *[][]int) int {
-	var sum int
-	for i := 0; i < len(*updates); i++ {
-		part1helper(rule, &(*updates)[i], &sum)
+func checkOrderHelper(rule *map[int][]int, update *[]int, correctSum *int, incorrectSum *int) {
+	var incorrect bool
+	for i := 0; i < len(*update)-1; i++ {
+		if incorrect {
+			break
+		}
+
+		if _, ok := (*rule)[(*update)[i]]; !ok {
+			incorrect = true
+			break
+		}
+
+		for j := i + 1; j < len(*update)-1; j++ {
+			if !contains((*rule)[(*update)[i]], (*update)[j]) {
+				incorrect = true
+				break
+			}
+		}
 	}
-	return sum
+
+	if incorrect {
+		ordered := *reOrder(rule, update)
+		*incorrectSum += ordered[len(ordered)/2]
+	} else {
+		*correctSum += (*update)[len(*update)/2]
+	}
+}
+
+func checkOrder(rule *map[int][]int, updates *[][]int) (int, int) {
+	var correctSum int
+	var incorrectSum int
+	for i := 0; i < len(*updates); i++ {
+		checkOrderHelper(rule, &(*updates)[i], &correctSum, &incorrectSum)
+	}
+	return correctSum, incorrectSum
 }
 
 func main() {
 	rule, updates := readFile()
-	fmt.Println(part1(&rule, &updates))
+	correct, incorrect := checkOrder(&rule, &updates)
+	fmt.Println("Correct sum:", correct)
+	fmt.Println("Incorrect sum:", incorrect)
 }
